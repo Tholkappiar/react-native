@@ -9,11 +9,29 @@ import {
     Platform,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { useAuth } from "../context/AuthContext";
+import { router } from "expo-router";
 
 export default function SignUpScreen() {
-    const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const { onRegister } = useAuth();
+
+    const [isRedirecting, setIsRedirecting] = useState(false);
+
+    const handleSignUp = async () => {
+        if (onRegister) {
+            const response = await onRegister(email, password);
+            if (response.success && !isRedirecting) {
+                setIsRedirecting(true);
+                router.push("/login");
+            } else {
+                console.log(response.error);
+            }
+        } else {
+            console.error("onSubmit function is not defined");
+        }
+    };
 
     return (
         <KeyboardAvoidingView
@@ -23,12 +41,6 @@ export default function SignUpScreen() {
             <StatusBar style="dark" />
             <View style={styles.formContainer}>
                 <Text style={styles.title}>Create Account</Text>
-                <TextInput
-                    style={styles.input}
-                    placeholder="Full Name"
-                    value={name}
-                    onChangeText={setName}
-                />
                 <TextInput
                     style={styles.input}
                     placeholder="Email"
@@ -44,13 +56,10 @@ export default function SignUpScreen() {
                     onChangeText={setPassword}
                     secureTextEntry
                 />
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => console.log("Sign Up pressed")}
-                >
+                <TouchableOpacity style={styles.button} onPress={handleSignUp}>
                     <Text style={styles.buttonText}>Sign Up</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => console.log("clicked")}>
+                <TouchableOpacity onPress={() => router.push("/login")}>
                     <Text style={styles.linkText}>
                         Already have an account? Log In
                     </Text>

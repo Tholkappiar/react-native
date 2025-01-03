@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
     View,
     Text,
@@ -9,10 +9,27 @@ import {
     Platform,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
+import { useAuth } from "../context/AuthContext";
+import { router } from "expo-router";
 
 export default function LoginScreen() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+
+    const { onLogin } = useAuth();
+
+    async function onSubmit() {
+        if (onLogin) {
+            const response = await onLogin(email, password);
+            if (response.success) {
+                router.push("/");
+            } else {
+                console.log(response);
+            }
+        } else {
+            console.error("onSubmit function is not defined");
+        }
+    }
 
     return (
         <KeyboardAvoidingView
@@ -37,13 +54,10 @@ export default function LoginScreen() {
                     onChangeText={setPassword}
                     secureTextEntry
                 />
-                <TouchableOpacity
-                    style={styles.button}
-                    onPress={() => console.log("Login pressed")}
-                >
+                <TouchableOpacity style={styles.button} onPress={onSubmit}>
                     <Text style={styles.buttonText}>Log In</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => console.log("clicked")}>
+                <TouchableOpacity onPress={() => router.push("/signup")}>
                     <Text style={styles.linkText}>
                         Don't have an account? Sign Up
                     </Text>

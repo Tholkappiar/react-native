@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import BlogItem from "../components/BlogItem";
 import { router } from "expo-router";
+import { useAuth } from "../context/AuthContext";
 
 const blogData = [
     {
@@ -71,7 +72,7 @@ const Blogs = () => {
             ]
         );
     };
-
+    const { authState } = useAuth();
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" />
@@ -89,6 +90,7 @@ const Blogs = () => {
                 keyExtractor={(item) => item.id}
                 contentContainerStyle={styles.listContainer}
             />
+            <Text>token: {JSON.stringify(authState?.token)}</Text>
         </SafeAreaView>
     );
 };
