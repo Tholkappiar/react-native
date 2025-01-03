@@ -45,7 +45,12 @@ const Blogs = () => {
     };
 
     const handleEdit = (id: string) => {
-        Alert.alert("Edit", `Editing blog with id: ${id}`);
+        router.push({
+            pathname: "/Blogedit",
+            params: {
+                id,
+            },
+        });
     };
 
     const handleDelete = (id: string) => {
