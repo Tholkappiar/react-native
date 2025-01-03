@@ -7,13 +7,14 @@ import {
     TouchableWithoutFeedback,
 } from "react-native";
 import { Feather } from "@expo/vector-icons";
+import { useAuth } from "@/context/AuthContext";
 
 interface BlogItemProps {
     blog: {
-        id: string;
-        title: string;
-        description: string;
-        author: string;
+        user_id: string;
+        Title: string;
+        Description: string;
+        Id: string;
     };
     onPress: () => void;
     onEdit: () => void;
@@ -26,28 +27,30 @@ const BlogItem: React.FC<BlogItemProps> = ({
     onEdit,
     onDelete,
 }) => {
+    const { authState } = useAuth();
     return (
         <TouchableWithoutFeedback onPress={onPress}>
             <View style={styles.container}>
                 <View style={styles.contentContainer}>
-                    <Text style={styles.title}>{blog.title}</Text>
-                    <Text style={styles.description}>{blog.description}</Text>
-                    <Text style={styles.author}>By {blog.author}</Text>
+                    <Text style={styles.title}>{blog.Title}</Text>
+                    <Text style={styles.description}>{blog.Description}</Text>
                 </View>
-                <View style={styles.buttonContainer}>
-                    <TouchableOpacity
-                        onPress={onEdit}
-                        style={styles.iconButton}
-                    >
-                        <Feather name="edit-3" size={18} color="#007AFF" />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        onPress={onDelete}
-                        style={styles.iconButton}
-                    >
-                        <Feather name="trash" size={18} color="#FF3B30" />
-                    </TouchableOpacity>
-                </View>
+                {authState?.userId && blog.user_id == authState.userId && (
+                    <View style={styles.buttonContainer}>
+                        <TouchableOpacity
+                            onPress={onEdit}
+                            style={styles.iconButton}
+                        >
+                            <Feather name="edit-3" size={18} color="#007AFF" />
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            onPress={() => onDelete()}
+                            style={styles.iconButton}
+                        >
+                            <Feather name="trash" size={18} color="#FF3B30" />
+                        </TouchableOpacity>
+                    </View>
+                )}
             </View>
         </TouchableWithoutFeedback>
     );

@@ -1,3 +1,4 @@
+import { useAuth } from "@/context/AuthContext";
 import { router } from "expo-router";
 import React from "react";
 import { View, Text, StyleSheet, Image, TouchableOpacity } from "react-native";
@@ -6,20 +7,15 @@ export default function ProfileScreen() {
     const userInfo = {
         name: "John Doe",
         email: "john@example.com",
-        bio: "Passionate blogger and tech enthusiast",
     };
+
+    const { onLogout, authState } = useAuth();
 
     return (
         <View style={styles.container}>
             <Text style={styles.name}>{userInfo.name}</Text>
             <Text style={styles.email}>{userInfo.email}</Text>
-            <Text style={styles.bio}>{userInfo.bio}</Text>
-            <TouchableOpacity
-                style={styles.button}
-                onPress={() => console.log("navigate")}
-            >
-                <Text style={styles.buttonText}>Edit Blog</Text>
-            </TouchableOpacity>
+            <Text style={styles.bio}>{authState?.userId}</Text>
             <TouchableOpacity
                 style={styles.button}
                 onPress={() => router.push("/login")}
@@ -32,6 +28,11 @@ export default function ProfileScreen() {
             >
                 <Text style={styles.buttonText}>Signup</Text>
             </TouchableOpacity>
+            {authState?.token && (
+                <TouchableOpacity style={styles.button} onPress={onLogout}>
+                    <Text style={styles.buttonText}>Logout</Text>
+                </TouchableOpacity>
+            )}
         </View>
     );
 }

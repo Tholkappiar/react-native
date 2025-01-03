@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
     Text,
     FlatList,
@@ -6,53 +6,52 @@ import {
     SafeAreaView,
     StatusBar,
     Alert,
+    TouchableOpacity,
 } from "react-native";
-import BlogItem from "../components/BlogItem";
 import { router } from "expo-router";
-import { useAuth } from "../context/AuthContext";
+import BlogItem from "../../components/BlogItem";
+import { useAuth } from "@/context/AuthContext";
+import { Feather } from "@expo/vector-icons";
+import axios from "axios";
+import { URL } from "@/constants/config";
 
-const blogData = [
-    {
-        id: "1",
-        title: "The Future of AI",
-        description:
-            "Exploring the potential impacts of artificial intelligence on various industries and daily life.",
-        author: "Jane Doe",
-    },
-    {
-        id: "2",
-        title: "Sustainable Living",
-        description:
-            "Practical tips for reducing your carbon footprint and living a more environmentally friendly lifestyle.",
-        author: "John Smith",
-    },
-    {
-        id: "3",
-        title: "The Art of Productivity",
-        description:
-            "Techniques and strategies to boost your productivity and achieve your goals more efficiently.",
-        author: "Alice Johnson",
-    },
-];
+interface Blog {
+    Id: string;
+    Title: string;
+    Description: string;
+    user_id: string;
+}
 
 const Blogs = () => {
+    const [blogs, setBlogs] = useState<Blog[]>([]);
+
     const handlePress = (id: string) => {
         router.push({
             pathname: "/BlogDetail",
-            params: {
-                id,
-            },
+            params: { id },
         });
     };
 
     const handleEdit = (id: string) => {
         router.push({
             pathname: "/Blogedit",
-            params: {
-                id,
-            },
+            params: { id },
         });
     };
+
+    const handleCreate = () => {
+        router.push("/Blogedit");
+    };
+
+    useEffect(() => {
+        async function getBlogs() {
+            const response = await axios.get(URL.BLOGS.GET_ALL_BLOGS);
+            if (response.status === 200) {
+                setBlogs(response.data?.blogs);
+            }
+        }
+        getBlogs();
+    }, []);
 
     const handleDelete = (id: string) => {
         Alert.alert(
@@ -65,32 +64,53 @@ const Blogs = () => {
                 },
                 {
                     text: "Delete",
-                    onPress: () => {
-                        console.log(`Deleting blog with id: ${id}`);
+                    onPress: async () => {
+                        try {
+                            const response = await axios.delete(
+                                URL.BLOGS.DELETE_BLOG(id)
+                            );
+                            if (response.status === 200) {
+                                setBlogs((prevBlogs) =>
+                                    prevBlogs.filter((blog) => blog.Id !== id)
+                                );
+                            }
+                        } catch (error) {
+                            console.log(JSON.stringify(error));
+                            console.error("Error deleting blog:", error);
+                        }
                     },
                 },
             ]
         );
     };
+
     const { authState } = useAuth();
+
     return (
         <SafeAreaView style={styles.container}>
             <StatusBar barStyle="dark-content" />
             <Text style={styles.header}>Blogs</Text>
             <FlatList
-                data={blogData}
+                data={blogs}
                 renderItem={({ item }) => (
                     <BlogItem
                         blog={item}
-                        onPress={() => handlePress(item.id)}
-                        onEdit={() => handleEdit(item.id)}
-                        onDelete={() => handleDelete(item.id)}
+                        onPress={() => handlePress(item.Id)}
+                        onEdit={() => handleEdit(item.Id)}
+                        onDelete={() => handleDelete(item.Id)}
                     />
                 )}
-                keyExtractor={(item) => item.id}
+                keyExtractor={(item) => item.Id}
                 contentContainerStyle={styles.listContainer}
             />
-            <Text>token: {JSON.stringify(authState?.token)}</Text>
+            {authState?.token && (
+                <TouchableOpacity
+                    style={styles.createButton}
+                    onPress={handleCreate}
+                >
+                    <Feather name="plus" size={24} color="white" />
+                </TouchableOpacity>
+            )}
         </SafeAreaView>
     );
 };
@@ -109,6 +129,22 @@ const styles = StyleSheet.create({
     },
     listContainer: {
         padding: 16,
+    },
+    createButton: {
+        position: "absolute",
+        bottom: 30,
+        right: 30,
+        width: 60,
+        height: 60,
+        borderRadius: 30,
+        backgroundColor: "#6A5ACD",
+        justifyContent: "center",
+        alignItems: "center",
+        elevation: 5,
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
     },
 });
 

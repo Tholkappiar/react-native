@@ -8,6 +8,7 @@ import {
 import axios from "axios";
 import { URL } from "../constants/config";
 import * as SecureStore from "expo-secure-store";
+import { router } from "expo-router";
 
 interface AuthProps {
     authState?: { token: string | null; userId: string | null };
@@ -88,6 +89,26 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
         }
     };
 
+    const logout = async () => {
+        try {
+            await SecureStore.deleteItemAsync("TOKEN");
+            await SecureStore.deleteItemAsync("USER_ID");
+            axios.defaults.headers.common["Authorization"] = "";
+            setUser({
+                token: "",
+                userId: "",
+            });
+            router.push("/");
+        } catch (err) {}
+    };
+
+    const value: AuthProps = {
+        onRegister: register,
+        onLogin: login,
+        onLogout: logout,
+        authState: user,
+    };
+
     useEffect(() => {
         const loadToken = async () => {
             const token = await SecureStore.getItemAsync("TOKEN");
@@ -106,25 +127,6 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({
 
         loadToken();
     });
-
-    const logout = async () => {
-        try {
-            await SecureStore.deleteItemAsync("TOKEN");
-            await SecureStore.deleteItemAsync("USER_ID");
-            axios.defaults.headers.common["Authorization"] = "";
-            setUser({
-                token: "",
-                userId: "",
-            });
-        } catch (err) {}
-    };
-
-    const value: AuthProps = {
-        onRegister: register,
-        onLogin: login,
-        onLogout: logout,
-        authState: user,
-    };
 
     return (
         <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

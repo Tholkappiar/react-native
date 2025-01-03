@@ -1,22 +1,41 @@
+import { URL } from "@/constants/config";
+import axios from "axios";
 import { useGlobalSearchParams } from "expo-router";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Text, StyleSheet, ScrollView, SafeAreaView } from "react-native";
 
+interface Blog {
+    Description: string;
+    Title: string;
+    user_id: string;
+}
+
 const BlogDetail = () => {
-    const blog = {
-        title: "some title",
-        author: "thols",
-        content: "some content",
-    };
+    const [blog, setBlog] = useState<Blog>({
+        Description: "",
+        Title: "",
+        user_id: "",
+    });
 
     const { id } = useGlobalSearchParams();
-    console.log(id);
+    const blogId = Array.isArray(id) ? id[0] : id;
+
+    useEffect(() => {
+        async function getBlog() {
+            if (!blogId) return;
+            const response = await axios.get(URL.BLOGS.GET_BLOG(blogId));
+            setBlog(response.data?.blogs);
+            console.log(response.data?.blogs);
+        }
+        getBlog();
+    }, []);
+
     return (
         <SafeAreaView style={styles.container}>
             <ScrollView contentContainerStyle={styles.scrollContainer}>
-                <Text style={styles.title}>{blog.title}</Text>
-                <Text style={styles.author}>By {blog.author}</Text>
-                <Text style={styles.content}>{blog.content}</Text>
+                <Text style={styles.title}>{blog.Title}</Text>
+                <Text style={styles.author}>By {blog.user_id}</Text>
+                <Text style={styles.content}>{blog.Description}</Text>
             </ScrollView>
         </SafeAreaView>
     );

@@ -9,7 +9,7 @@ import {
     Platform,
 } from "react-native";
 import { StatusBar } from "expo-status-bar";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "../../context/AuthContext";
 import { router } from "expo-router";
 
 export default function SignUpScreen() {
